@@ -13,7 +13,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 404 - Não encontrado
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -23,7 +22,6 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // 400 - Erros de validação do @Valid
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> erros = new HashMap<>();
@@ -38,7 +36,6 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // 400 - IllegalArgumentException (intervalo inválido, conflito etc.)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -48,7 +45,6 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    // 500 – qualquer erro inesperado
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
