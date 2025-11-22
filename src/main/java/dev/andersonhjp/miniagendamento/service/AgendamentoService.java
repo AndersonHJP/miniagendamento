@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -30,6 +31,14 @@ public class AgendamentoService {
         Agendamento entity = AgendamentoMapper.toEntity(req);
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
+    }
+
+    @Transactional
+    public List<AgendamentoResponse> listarAgenda(){
+        List<Agendamento> agendamentos = repository.findAll();
+        return agendamentos.stream()
+                .map(AgendamentoMapper::toResponse)
+                .toList();
     }
 
     @Transactional

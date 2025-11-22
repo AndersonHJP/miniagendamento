@@ -6,7 +6,10 @@ import dev.andersonhjp.miniagendamento.dto.AgendamentoUpdateRequest;
 import dev.andersonhjp.miniagendamento.service.AgendamentoService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/agendamentos")
@@ -19,6 +22,11 @@ public class AgendamentoController {
     public AgendamentoResponse criar(@Valid @RequestBody AgendamentoCreateRequest request){
         return service.criar(request);
 
+    }
+    @GetMapping
+    public ResponseEntity<List<AgendamentoResponse>> listarAgenda(){
+        List<AgendamentoResponse> lista = service.listarAgenda();
+        return ResponseEntity.ok(lista);
     }
 
     @PutMapping("/{id}")
