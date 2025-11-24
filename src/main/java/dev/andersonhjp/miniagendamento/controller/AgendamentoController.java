@@ -62,14 +62,14 @@ public class AgendamentoController {
         return ResponseEntity.ok(service.buscarHoje());
     }
 
-    @GetMapping("/semana")
-    public ResponseEntity<List<AgendamentoResponse>> listarSemana() {
-        return ResponseEntity.ok(service.buscarSemana());
-    }
-
-    @GetMapping("/mes")
-    public ResponseEntity<List<AgendamentoResponse>> listarMes() {
-        return ResponseEntity.ok(service.buscarMes());
-    }
+//    @GetMapping("/semana")
+//    public ResponseEntity<List<AgendamentoResponse>> listarSemana() {
+//        return ResponseEntity.ok(service.buscarSemana());
+//    }
+//
+//    @GetMapping("/mes")
+//    public ResponseEntity<List<AgendamentoResponse>> listarMes() {
+//        return ResponseEntity.ok(service.buscarMes());
+//    }
 
 }

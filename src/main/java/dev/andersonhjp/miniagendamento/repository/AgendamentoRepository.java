@@ -37,8 +37,8 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
     """)
     List<Agendamento> buscarComFiltro(
             @Param("status") StatusAgendamento status,
-            @Param("dataInicio") LocalDate dataInicio,
-            @Param("dataFim") LocalDate dataFim,
+            @Param("dataInicio") LocalDateTime dataInicio,
+            @Param("dataFim") LocalDateTime dataFim,
             @Param("usuario") String usuario,
             @Param("titulo") String titulo
     );

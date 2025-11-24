@@ -96,25 +96,25 @@ public class AgendamentoService {
 
     @Transactional(readOnly = true)
     public List<AgendamentoResponse> buscarHoje(){
-        LocalDate hoje = LocalDate.now();
+        LocalDateTime hoje = LocalDateTime.now();
         return listar(new AgendamentoFiltroRequest(null, hoje, hoje,null,null));
     }
 
-    @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarSemana(){
-        LocalDate hoje = LocalDate.now();
-        LocalDate inicio = hoje.with(DayOfWeek.MONDAY);
-        LocalDate fim = hoje.with(DayOfWeek.SUNDAY);
-        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
-    }
-
-    @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarMes() {
-        LocalDate hoje = LocalDate.now();
-        LocalDate inicio = hoje.withDayOfMonth(1);
-        LocalDate fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
-        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
-    }
+//    @Transactional(readOnly = true)
+//    public List<AgendamentoResponse> buscarSemana(){
+//        LocalDate hoje = LocalDate.now();
+//        LocalDate inicio = hoje.with(DayOfWeek.MONDAY);
+//        LocalDate fim = hoje.with(DayOfWeek.SUNDAY);
+//        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
+//    }
+//
+//    @Transactional(readOnly = true)
+//    public List<AgendamentoResponse> buscarMes() {
+//        LocalDate hoje = LocalDate.now();
+//        LocalDate inicio = hoje.withDayOfMonth(1);
+//        LocalDate fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
+//        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
+//    }
 
 
 
