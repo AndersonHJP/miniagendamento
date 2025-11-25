@@ -1,9 +1,6 @@
 package dev.andersonhjp.miniagendamento.service;
 
-import dev.andersonhjp.miniagendamento.dto.AgendamentoCreateRequest;
-import dev.andersonhjp.miniagendamento.dto.AgendamentoFiltroRequest;
-import dev.andersonhjp.miniagendamento.dto.AgendamentoResponse;
-import dev.andersonhjp.miniagendamento.dto.AgendamentoUpdateRequest;
+import dev.andersonhjp.miniagendamento.dto.*;
 import dev.andersonhjp.miniagendamento.mapper.AgendamentoMapper;
 import dev.andersonhjp.miniagendamento.model.Agendamento;
 import dev.andersonhjp.miniagendamento.model.StatusAgendamento;
@@ -17,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.IsoFields;
 import java.util.List;
 
 @Service
@@ -81,13 +79,9 @@ public class AgendamentoService {
     }
     // ------------------------------FILTROS-----------------------------------------------
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<AgendamentoResponse> listar(AgendamentoFiltroRequest filtro) {
-        List<Agendamento> lista = repository.buscarComFiltro(filtro.status(),
-                filtro.dataInicio(),
-                filtro.dataFim(),
-                filtro.usuario(),
-                filtro.titulo()
+        List<Agendamento> lista = repository.buscarComFiltro(filtro.status(), filtro.dataInicio(), filtro.dataFim(), filtro.usuario(), filtro.titulo()
         );
         return lista.stream()
                 .map(AgendamentoMapper::toResponse)
@@ -95,28 +89,43 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarHoje(){
+    public List<AgendamentoResponse> buscarHoje() {
         LocalDateTime hoje = LocalDateTime.now();
-        return listar(new AgendamentoFiltroRequest(null, hoje, hoje,null,null));
+        return listar(new AgendamentoFiltroRequest(null, hoje, hoje, null, null));
     }
 
-//    @Transactional(readOnly = true)
-//    public List<AgendamentoResponse> buscarSemana(){
-//        LocalDate hoje = LocalDate.now();
-//        LocalDate inicio = hoje.with(DayOfWeek.MONDAY);
-//        LocalDate fim = hoje.with(DayOfWeek.SUNDAY);
-//        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public List<AgendamentoResponse> buscarMes() {
-//        LocalDate hoje = LocalDate.now();
-//        LocalDate inicio = hoje.withDayOfMonth(1);
-//        LocalDate fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
-//        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
-//    }
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponse> buscarSemanaDoAno(int ano, int semana) {
+
+        LocalDate dataBase = LocalDate.ofYearDay(ano, 1)
+                .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, semana)
+                .with(DayOfWeek.MONDAY);
+
+        LocalDateTime inicio = dataBase.atStartOfDay();
+        LocalDateTime fim = dataBase.with(DayOfWeek.SUNDAY).atTime(23, 59, 59, 999_999_999);
+
+        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponse> buscarMes(int ano, int mes) {
+        IntervaloDatas intervalo = calcularIntervaloMes(ano, mes);
+
+        return listar(new AgendamentoFiltroRequest(null, intervalo.inicio(), intervalo.fim(), null, null));
+    }
+
+    private IntervaloDatas calcularIntervaloMes(int ano, int mes) {
+        LocalDate dataBase = LocalDate.of(ano, mes, 1);
+
+        LocalDateTime inicio = dataBase.atStartOfDay();
+        LocalDateTime fim = dataBase.withDayOfMonth(dataBase.lengthOfMonth())
+                .atTime(23, 59, 59, 999_999_999);
+
+        return new IntervaloDatas(inicio, fim);
+    }
 
 
+//    ---------------------------------VALIDAÇÕES------------------------------------------
 
     private Agendamento buscarOurFalhar(Long id) {
         return repository.findById(id)
