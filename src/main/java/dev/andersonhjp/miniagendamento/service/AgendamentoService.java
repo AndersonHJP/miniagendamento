@@ -81,7 +81,12 @@ public class AgendamentoService {
 
     @Transactional
     public List<AgendamentoResponse> listar(AgendamentoFiltroRequest filtro) {
-        List<Agendamento> lista = repository.buscarComFiltro(filtro.status(), filtro.dataInicio(), filtro.dataFim(), filtro.usuario(), filtro.titulo()
+        List<Agendamento> lista = repository.buscarComFiltro(
+                filtro.status(),
+                filtro.dataInicio(),
+                filtro.dataFim(),
+                filtro.usuario(),
+                filtro.titulo()
         );
         return lista.stream()
                 .map(AgendamentoMapper::toResponse)
