@@ -1,7 +1,6 @@
 package dev.andersonhjp.miniagendamento.controller;
 
 import dev.andersonhjp.miniagendamento.dto.AgendamentoCreateRequest;
-import dev.andersonhjp.miniagendamento.dto.AgendamentoFiltroRequest;
 import dev.andersonhjp.miniagendamento.dto.AgendamentoResponse;
 import dev.andersonhjp.miniagendamento.dto.AgendamentoUpdateRequest;
 import dev.andersonhjp.miniagendamento.service.AgendamentoService;
@@ -22,13 +21,35 @@ public class AgendamentoController {
     @PostMapping
     public AgendamentoResponse criar(@Valid @RequestBody AgendamentoCreateRequest request) {
         return service.criar(request);
-
     }
 
     @GetMapping
     public ResponseEntity<List<AgendamentoResponse>> listarAgenda() {
-        List<AgendamentoResponse> lista = service.listarAgendas();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(service.listarAgendas());
+    }
+
+    @GetMapping("/hoje")
+    public ResponseEntity<List<AgendamentoResponse>> listarHoje() {
+        return ResponseEntity.ok(service.buscarHoje());
+    }
+
+    @GetMapping("/semana")
+    public ResponseEntity<List<AgendamentoResponse>> listarSemana(
+            @RequestParam int ano,
+            @RequestParam int semana) {
+
+        return ResponseEntity.ok(service.buscarSemanaDoMes(ano, semana));
+    }
+
+    @GetMapping("/mes")
+    public ResponseEntity<List<AgendamentoResponse>> listarMes(@RequestParam int ano,
+                                                               @RequestParam int mes) {
+        return ResponseEntity.ok(service.buscarMes(ano, mes));
+    }
+
+    @GetMapping("/{id}")
+    public AgendamentoResponse buscarPorId(@PathVariable Long id) {
+        return service.buscarPorId(id);
     }
 
     @PutMapping("/{id}")
@@ -46,30 +67,4 @@ public class AgendamentoController {
     public AgendamentoResponse concluir(@PathVariable Long id) {
         return service.concluir(id);
     }
-
-    @GetMapping("/{id}")
-    public AgendamentoResponse buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id);
-    }
-
-    @GetMapping("/filtrar")
-    public ResponseEntity<List<AgendamentoResponse>> listar(AgendamentoFiltroRequest filtro) {
-        return ResponseEntity.ok(service.listar(filtro));
-    }
-
-    @GetMapping("/hoje")
-    public ResponseEntity<List<AgendamentoResponse>> listarHoje() {
-        return ResponseEntity.ok(service.buscarHoje());
-    }
-
-//    @GetMapping("/semana")
-//    public ResponseEntity<List<AgendamentoResponse>> listarSemana() {
-//        return ResponseEntity.ok(service.buscarSemana());
-//    }
-//
-//    @GetMapping("/mes")
-//    public ResponseEntity<List<AgendamentoResponse>> listarMes() {
-//        return ResponseEntity.ok(service.buscarMes());
-//    }
-
 }
