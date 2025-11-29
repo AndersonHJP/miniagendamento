@@ -27,9 +27,9 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
 
     @Query("""
                 SELECT a FROM Agendamento a
-                WHERE (:status IS NULL OR a.status = :status)
-              AND (CAST(:dataInicio AS timestamp) IS NULL OR a.dataInicio >= :dataInicio)
-              AND (CAST(:dataFim AS timestamp) IS NULL OR a.dataFim <= :dataFim)
+            WHERE (:status IS NULL OR a.status = :status)
+              AND (CAST(:dataInicio AS timestamp) IS NULL OR a.dataFim >= :dataInicio)
+              AND (CAST(:dataFim AS timestamp) IS NULL OR a.dataInicio <= :dataFim)
               AND (:usuario IS NULL OR a.usuario = :usuario)
               AND LOWER(a.titulo) LIKE LOWER(CONCAT('%', COALESCE(:titulo, ''), '%'))
             """)

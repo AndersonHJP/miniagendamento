@@ -95,12 +95,18 @@ public class AgendamentoService {
 
     @Transactional(readOnly = true)
     public List<AgendamentoResponse> buscarHoje() {
-        LocalDateTime hoje = LocalDateTime.now();
-        return listar(new AgendamentoFiltroRequest(null, hoje, hoje, null, null));
+        IntervaloDatas intervalo = calcularIntervaloDia(LocalDate.now());
+        return listar(new AgendamentoFiltroRequest(null, intervalo.inicio(), intervalo.fim(), null, null));
+    }
+
+    private IntervaloDatas calcularIntervaloDia(LocalDate dia) {
+        LocalDateTime inicio = dia.atStartOfDay();
+        LocalDateTime fim = dia.atTime(23, 59, 59, 999_999_999);
+        return new IntervaloDatas(inicio, fim);
     }
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarSemanaDoAno(int ano, int semana) {
+    public List<AgendamentoResponse> buscarSemanaDoMes(int ano, int semana) {
 
         LocalDate dataBase = LocalDate.ofYearDay(ano, 1)
                 .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, semana)
@@ -111,6 +117,7 @@ public class AgendamentoService {
 
         return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
     }
+
 
     @Transactional(readOnly = true)
     public List<AgendamentoResponse> buscarMes(int ano, int mes) {

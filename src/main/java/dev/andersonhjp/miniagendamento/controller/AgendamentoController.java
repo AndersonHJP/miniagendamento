@@ -28,11 +28,6 @@ public class AgendamentoController {
         return ResponseEntity.ok(service.listarAgendas());
     }
 
-//    @GetMapping("/filtrar")
-//    public ResponseEntity<List<AgendamentoResponse>> listar(AgendamentoFiltroRequest filtro) {
-//        return ResponseEntity.ok(service.listar(filtro));
-//    }
-
     @GetMapping("/hoje")
     public ResponseEntity<List<AgendamentoResponse>> listarHoje() {
         return ResponseEntity.ok(service.buscarHoje());
@@ -43,7 +38,7 @@ public class AgendamentoController {
             @RequestParam int ano,
             @RequestParam int semana) {
 
-        return ResponseEntity.ok(service.buscarSemanaDoAno(ano, semana));
+        return ResponseEntity.ok(service.buscarSemanaDoMes(ano, semana));
     }
 
     @GetMapping("/mes")
