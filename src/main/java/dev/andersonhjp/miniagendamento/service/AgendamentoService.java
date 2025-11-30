@@ -45,9 +45,11 @@ public class AgendamentoService {
     @Transactional
     public AgendamentoResponse atualizar(Long id, @Valid AgendamentoUpdateRequest request) {
         Agendamento entity = buscarOurFalhar(id);
-        AgendamentoMapper.merge(entity, request);
         validarIntervalor(request.dataInicio(), request.dataFim());
-        checarConflito(entity.getUsuario(), request.dataInicio(), request.dataFim(), entity.getId());
+        if (!request.dataInicio().equals(entity.getDataInicio()) || !request.dataFim().equals(entity.getDataFim())){
+            checarConflito(entity.getUsuario(), request.dataInicio(), request.dataFim(), entity.getId());
+        }
+        AgendamentoMapper.merge(entity, request);
 
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
