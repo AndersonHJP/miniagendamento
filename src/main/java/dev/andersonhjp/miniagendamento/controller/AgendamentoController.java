@@ -63,6 +63,11 @@ public class AgendamentoController {
         return service.cancelarAgendamento(id);
     }
 
+    @PutMapping("/{id}/pendente")
+    public AgendamentoResponse definirPendente(@PathVariable Long id) {
+        return service.definirStatusPendente(id);
+    }
+
     @PutMapping("/{id}/concluir")
     public AgendamentoResponse concluir(@PathVariable Long id) {
         return service.concluirAgendamento(id);

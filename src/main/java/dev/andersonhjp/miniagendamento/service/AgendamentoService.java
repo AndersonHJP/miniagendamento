@@ -56,6 +56,9 @@ public class AgendamentoService {
     @Transactional
     public AgendamentoResponse cancelarAgendamento(Long id) {
         Agendamento entity = buscarPorIdOuLancarExcecao(id);
+        if (entity.getStatus() == StatusAgendamento.CANCELADO) {
+            throw new IllegalArgumentException("Agendamento já está cancelado.");
+        }
         entity.setStatus(StatusAgendamento.CANCELADO);
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
@@ -63,8 +66,22 @@ public class AgendamentoService {
     }
 
     @Transactional
+    public AgendamentoResponse definirStatusPendente(Long id) {
+        Agendamento entity = buscarPorIdOuLancarExcecao(id);
+        if (entity.getStatus() == StatusAgendamento.PENDENTE) {
+            throw new IllegalArgumentException("Agendamento já está pendente.");
+        }
+        entity.setStatus(StatusAgendamento.PENDENTE);
+        entity = repository.save(entity);
+        return AgendamentoMapper.toResponse(entity);
+    }
+
+    @Transactional
     public AgendamentoResponse concluirAgendamento(Long id) {
         Agendamento entity = buscarPorIdOuLancarExcecao(id);
+        if (entity.getStatus() == StatusAgendamento.CONCLUIDO) {
+            throw new IllegalArgumentException("Agendamento já está concluido.");
+        }
         entity.setStatus(StatusAgendamento.CONCLUIDO);
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
