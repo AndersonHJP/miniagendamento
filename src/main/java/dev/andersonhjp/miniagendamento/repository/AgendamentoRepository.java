@@ -2,6 +2,8 @@ package dev.andersonhjp.miniagendamento.repository;
 
 import dev.andersonhjp.miniagendamento.model.Agendamento;
 import dev.andersonhjp.miniagendamento.model.StatusAgendamento;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,11 +35,12 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
               AND (:usuario IS NULL OR a.usuario = :usuario)
               AND LOWER(a.titulo) LIKE LOWER(CONCAT('%', COALESCE(:titulo, ''), '%'))
             """)
-    List<Agendamento> buscarComFiltro(
+    Page<Agendamento> buscarComFiltro(
             @Param("status") StatusAgendamento status,
             @Param("dataInicio") LocalDateTime dataInicio,
             @Param("dataFim") LocalDateTime dataFim,
             @Param("usuario") String usuario,
-            @Param("titulo") String titulo
+            @Param("titulo") String titulo,
+            Pageable pageable
     );
 }
