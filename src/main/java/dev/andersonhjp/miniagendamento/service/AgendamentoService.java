@@ -42,7 +42,7 @@ public class AgendamentoService {
                 .toList();
     }
 
-    @Transactional
+@Transactional
     public AgendamentoResponse atualizarAgendamento(Long id, @Valid AgendamentoUpdateRequest request) {
         Agendamento entity = buscarPorIdOuLancarExcecao(id);
         AgendamentoMapper.merge(entity, request);
