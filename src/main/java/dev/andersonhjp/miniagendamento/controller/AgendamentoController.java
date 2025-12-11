@@ -6,10 +6,10 @@ import dev.andersonhjp.miniagendamento.dto.AgendamentoUpdateRequest;
 import dev.andersonhjp.miniagendamento.service.AgendamentoService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/agendamentos")
@@ -24,17 +24,18 @@ public class AgendamentoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AgendamentoResponse>> listarAgenda() {
-        return ResponseEntity.ok(service.listarAgendamentos());
+    public ResponseEntity<Page<AgendamentoResponse>> listarAgenda(Pageable pageable) {
+        Page<AgendamentoResponse> pagina = service.listarAgendamentos(pageable);
+        return ResponseEntity.ok(pagina);
     }
 
     @GetMapping("/hoje")
-    public ResponseEntity<List<AgendamentoResponse>> listarHoje() {
+    public ResponseEntity<Page<AgendamentoResponse>> listarHoje() {
         return ResponseEntity.ok(service.buscarHoje());
     }
 
     @GetMapping("/semana")
-    public ResponseEntity<List<AgendamentoResponse>> listarSemana(
+    public ResponseEntity<Page<AgendamentoResponse>> listarSemana(
             @RequestParam int ano,
             @RequestParam int semana) {
 
@@ -42,7 +43,7 @@ public class AgendamentoController {
     }
 
     @GetMapping("/mes")
-    public ResponseEntity<List<AgendamentoResponse>> listarMes(@RequestParam int ano,
+    public ResponseEntity<Page<AgendamentoResponse>> listarMes(@RequestParam int ano,
                                                                @RequestParam int mes) {
         return ResponseEntity.ok(service.buscarMes(ano, mes));
     }

@@ -6,6 +6,8 @@ import dev.andersonhjp.miniagendamento.model.Agendamento;
 import dev.andersonhjp.miniagendamento.model.StatusAgendamento;
 import dev.andersonhjp.miniagendamento.repository.AgendamentoRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -15,7 +17,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.IsoFields;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -35,11 +36,9 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> listarAgendamentos() {
-        List<Agendamento> agendamentos = repository.findAll();
-        return agendamentos.stream()
-                .map(AgendamentoMapper::toResponse)
-                .toList();
+    public Page<AgendamentoResponse> listarAgendamentos(Pageable pageable) {
+        Page<Agendamento> paginaDeAgendamentos = repository.findAll(pageable);
+        return paginaDeAgendamentos.map(AgendamentoMapper::toResponse);
     }
 
 @Transactional
@@ -96,24 +95,24 @@ public class AgendamentoService {
     }
     // ------------------------------FILTROS-----------------------------------------------
 
-    @Transactional
-    public List<AgendamentoResponse> listar(AgendamentoFiltroRequest filtro) {
-        List<Agendamento> lista = repository.buscarComFiltro(
+    @Transactional(readOnly = true)
+    public Page<AgendamentoResponse> listar(AgendamentoFiltroRequest filtro, Pageable pageable) {
+        Page<Agendamento> pageDeEntidades  = repository.buscarComFiltro(
                 filtro.status(),
                 filtro.dataInicio(),
                 filtro.dataFim(),
                 filtro.usuario(),
-                filtro.titulo()
+                filtro.titulo(),
+                pageable
         );
-        return lista.stream()
-                .map(AgendamentoMapper::toResponse)
-                .toList();
+
+        return pageDeEntidades.map(AgendamentoMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarHoje() {
+    public Page<AgendamentoResponse> buscarHoje() {
         IntervaloDatas intervalo = calcularIntervaloDia(LocalDate.now());
-        return listar(new AgendamentoFiltroRequest(null, intervalo.inicio(), intervalo.fim(), null, null));
+        return listar(new AgendamentoFiltroRequest(null, intervalo.inicio(), intervalo.fim(), null, null), Pageable.unpaged());
     }
 
     private IntervaloDatas calcularIntervaloDia(LocalDate dia) {
@@ -123,7 +122,7 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarSemanaDoMes(int ano, int semana) {
+    public Page<AgendamentoResponse> buscarSemanaDoMes(int ano, int semana) {
 
         LocalDate dataBase = LocalDate.ofYearDay(ano, 1)
                 .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, semana)
@@ -132,15 +131,15 @@ public class AgendamentoService {
         LocalDateTime inicio = dataBase.atStartOfDay();
         LocalDateTime fim = dataBase.with(DayOfWeek.SUNDAY).atTime(23, 59, 59, 999_999_999);
 
-        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null));
+        return listar(new AgendamentoFiltroRequest(null, inicio, fim, null, null), Pageable.unpaged());
     }
 
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> buscarMes(int ano, int mes) {
+    public Page<AgendamentoResponse> buscarMes(int ano, int mes) {
         IntervaloDatas intervalo = calcularIntervaloMes(ano, mes);
 
-        return listar(new AgendamentoFiltroRequest(null, intervalo.inicio(), intervalo.fim(), null, null));
+        return listar(new AgendamentoFiltroRequest(null, intervalo.inicio(), intervalo.fim(), null, null), Pageable.unpaged());
     }
 
     private IntervaloDatas calcularIntervaloMes(int ano, int mes) {
@@ -162,14 +161,19 @@ public class AgendamentoService {
     }
 
     private void validarIntervaloDeDatas(LocalDateTime inicio, LocalDateTime fim) {
-        if (inicio == null || fim == null || !inicio.isBefore(fim)) {
-            throw new IllegalArgumentException("Intervalo invalido: dataInicio deve ser anterior a dataFim");
+        if (inicio == null || fim == null) {
+            throw new IllegalArgumentException("Datas inválidas: início e fim devem ser informados.");
+        }
+        if (!inicio.isBefore(fim)){
+            throw new IllegalArgumentException("Intervalo inválido: a data de início precisa ser anterior à data de fim.");
         }
     }
 
     private void validarConflitoDeAgendamento(String usuario, LocalDateTime inicio, LocalDateTime fim, Long id) {
         if (repository.existsConflito(usuario, inicio, fim, id)) {
-            throw new IllegalArgumentException("Conflito na agenda: Já existe um agendamento nesse periodo");
+            throw new IllegalArgumentException("Conflito na agenda: Já existe um agendamento nesse periodo entre %s e %s."
+                    .formatted(usuario, inicio, fim)
+            );
         }
     }
 
