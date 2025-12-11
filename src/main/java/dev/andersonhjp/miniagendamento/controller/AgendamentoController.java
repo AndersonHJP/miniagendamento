@@ -20,12 +20,12 @@ public class AgendamentoController {
 
     @PostMapping
     public AgendamentoResponse criar(@Valid @RequestBody AgendamentoCreateRequest request) {
-        return service.criar(request);
+        return service.criarAgendamento(request);
     }
 
     @GetMapping
     public ResponseEntity<List<AgendamentoResponse>> listarAgenda() {
-        return ResponseEntity.ok(service.listarAgendas());
+        return ResponseEntity.ok(service.listarAgendamentos());
     }
 
     @GetMapping("/hoje")
@@ -49,22 +49,27 @@ public class AgendamentoController {
 
     @GetMapping("/{id}")
     public AgendamentoResponse buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id);
+        return service.buscarAgendamentoPorId(id);
     }
 
     @PutMapping("/{id}")
     public AgendamentoResponse atualizar(@PathVariable Long id,
                                          @Valid @RequestBody AgendamentoUpdateRequest request) {
-        return service.atualizar(id, request);
+        return service.atualizarAgendamento(id, request);
     }
 
     @PutMapping("/{id}/cancelar")
     public AgendamentoResponse cancelar(@PathVariable Long id) {
-        return service.cancelar(id);
+        return service.cancelarAgendamento(id);
+    }
+
+    @PutMapping("/{id}/pendente")
+    public AgendamentoResponse definirPendente(@PathVariable Long id) {
+        return service.definirStatusPendente(id);
     }
 
     @PutMapping("/{id}/concluir")
     public AgendamentoResponse concluir(@PathVariable Long id) {
-        return service.concluir(id);
+        return service.concluirAgendamento(id);
     }
 }

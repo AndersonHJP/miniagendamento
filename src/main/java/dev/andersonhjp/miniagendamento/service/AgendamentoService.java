@@ -24,10 +24,10 @@ public class AgendamentoService {
     private final AgendamentoRepository repository;
 
     @Transactional
-    public AgendamentoResponse criar(@Valid AgendamentoCreateRequest req) {
+    public AgendamentoResponse criarAgendamento(@Valid AgendamentoCreateRequest req) {
 
-        validarIntervalor(req.dataInicio(), req.dataFim());
-        checarConflito(req.usuario(), req.dataInicio(), req.dataFim(), null);
+        validarIntervaloDeDatas(req.dataInicio(), req.dataFim());
+        validarConflitoDeAgendamento(req.usuario(), req.dataInicio(), req.dataFim(), null);
 
         Agendamento entity = AgendamentoMapper.toEntity(req);
         entity = repository.save(entity);
@@ -35,29 +35,30 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> listarAgendas() {
+    public List<AgendamentoResponse> listarAgendamentos() {
         List<Agendamento> agendamentos = repository.findAll();
         return agendamentos.stream()
                 .map(AgendamentoMapper::toResponse)
                 .toList();
     }
 
-    @Transactional
-    public AgendamentoResponse atualizar(Long id, @Valid AgendamentoUpdateRequest request) {
-        Agendamento entity = buscarOurFalhar(id);
-        validarIntervalor(request.dataInicio(), request.dataFim());
-        if (!request.dataInicio().equals(entity.getDataInicio()) || !request.dataFim().equals(entity.getDataFim())){
-            checarConflito(entity.getUsuario(), request.dataInicio(), request.dataFim(), entity.getId());
-        }
+@Transactional
+    public AgendamentoResponse atualizarAgendamento(Long id, @Valid AgendamentoUpdateRequest request) {
+        Agendamento entity = buscarPorIdOuLancarExcecao(id);
         AgendamentoMapper.merge(entity, request);
+        validarIntervaloDeDatas(request.dataInicio(), request.dataFim());
+        validarConflitoDeAgendamento(entity.getUsuario(), request.dataInicio(), request.dataFim(), entity.getId());
 
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
     }
 
     @Transactional
-    public AgendamentoResponse cancelar(Long id) {
-        Agendamento entity = buscarOurFalhar(id);
+    public AgendamentoResponse cancelarAgendamento(Long id) {
+        Agendamento entity = buscarPorIdOuLancarExcecao(id);
+        if (entity.getStatus() == StatusAgendamento.CANCELADO) {
+            throw new IllegalArgumentException("Agendamento já está cancelado.");
+        }
         entity.setStatus(StatusAgendamento.CANCELADO);
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
@@ -65,8 +66,22 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendamentoResponse concluir(Long id) {
-        Agendamento entity = buscarOurFalhar(id);
+    public AgendamentoResponse definirStatusPendente(Long id) {
+        Agendamento entity = buscarPorIdOuLancarExcecao(id);
+        if (entity.getStatus() == StatusAgendamento.PENDENTE) {
+            throw new IllegalArgumentException("Agendamento já está pendente.");
+        }
+        entity.setStatus(StatusAgendamento.PENDENTE);
+        entity = repository.save(entity);
+        return AgendamentoMapper.toResponse(entity);
+    }
+
+    @Transactional
+    public AgendamentoResponse concluirAgendamento(Long id) {
+        Agendamento entity = buscarPorIdOuLancarExcecao(id);
+        if (entity.getStatus() == StatusAgendamento.CONCLUIDO) {
+            throw new IllegalArgumentException("Agendamento já está concluido.");
+        }
         entity.setStatus(StatusAgendamento.CONCLUIDO);
         entity = repository.save(entity);
         return AgendamentoMapper.toResponse(entity);
@@ -74,8 +89,8 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendamentoResponse buscarPorId(Long id) {
-        Agendamento entity = buscarOurFalhar(id);
+    public AgendamentoResponse buscarAgendamentoPorId(Long id) {
+        Agendamento entity = buscarPorIdOuLancarExcecao(id);
         return AgendamentoMapper.toResponse(entity);
 
     }
@@ -141,18 +156,18 @@ public class AgendamentoService {
 
 //    ---------------------------------VALIDAÇÕES------------------------------------------
 
-    private Agendamento buscarOurFalhar(Long id) {
+    private Agendamento buscarPorIdOuLancarExcecao(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado"));
     }
 
-    private void validarIntervalor(LocalDateTime inicio, LocalDateTime fim) {
+    private void validarIntervaloDeDatas(LocalDateTime inicio, LocalDateTime fim) {
         if (inicio == null || fim == null || !inicio.isBefore(fim)) {
             throw new IllegalArgumentException("Intervalo invalido: dataInicio deve ser anterior a dataFim");
         }
     }
 
-    private void checarConflito(String usuario, LocalDateTime inicio, LocalDateTime fim, Long id) {
+    private void validarConflitoDeAgendamento(String usuario, LocalDateTime inicio, LocalDateTime fim, Long id) {
         if (repository.existsConflito(usuario, inicio, fim, id)) {
             throw new IllegalArgumentException("Conflito na agenda: Já existe um agendamento nesse periodo");
         }
